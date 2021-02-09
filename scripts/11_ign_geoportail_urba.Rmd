@@ -28,6 +28,8 @@ library(tidyverse)
 
 # Contenu
 
+Le [Géoportail de l'Urbanisme](https://www.geoportail-urbanisme.gouv.fr/) offre des [services de téléchargement, de consultation ainsi que des API](https://www.geoportail-urbanisme.gouv.fr/services/).
+
 Les couches SIG proposées sont les suivantes :
 
 - document
@@ -150,11 +152,11 @@ mapview::mapview(assemblage)
 
 
 ```{r, eval = FALSE}
-fichier_donnees_traitees <- "processed_data/prescription_surf.shp"
+fichier_donnees_traitees <- "processed_data/prescription_lin.shp"
 ```
 
 ```{r, echo = FALSE}
-fichier_donnees_traitees <- "../processed_data/prescription_surf.shp"
+fichier_donnees_traitees <- "../processed_data/prescription_lin.shp"
 ```
 
 ```{r}
@@ -206,3 +208,6 @@ ign_urba_api_shp(couche = ma_couche,
                   scr = 2154)
 ```
 
+Le résultat se retrouve par défaut dans le répertoire "processed_data" :
+
+![](../assets/explorateur_4.png)

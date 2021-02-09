@@ -1,0 +1,57 @@
+---
+title: "Package {tod} - Banque HYDRO"
+author: "Pascal Irz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Package {tod} - Banque HYDRO}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  cache = FALSE,
+  comment = "#>"
+)
+```
+
+Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées.
+
+Activation des `packages`.
+
+```{r, message = FALSE, warning = FALSE}
+library(tod)
+library(tidyverse)
+```
+
+# Contenu
+
+Blabla
+
+# Données temps réel
+
+## Téléchargement
+
+```{r}
+data_sta <- menv_bh_htr_tod(station_id = "J7010610")
+```
+
+## Structure du tableau
+
+Visualisation des premières lignes du tableau.
+
+```{r}
+data_sta %>% 
+  head() %>% 
+  DT::datatable()
+```
+
+Représnetation graphique
+
+```{r}
+ggplot(data = data_sta, aes(x = date_obs, y = resultat_obs)) +
+  geom_point()
+```
+

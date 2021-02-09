@@ -2,16 +2,16 @@ detach("package:tod", unload=TRUE)
 library(tod)
 library(tidyverse)
 
-ma_couche <- "prescription_surf"
-repertoire_donnees_brutes <- "raw_data/prescription_surf"
+ma_couche <- "prescription_lin"
+repertoire_donnees_brutes <- "raw_data/prescription_lin"
 fichier_donnees_traitees <- "processed_data/prescription_surf.shp"
 
 tod::ign_urba_tod(couche = ma_couche,
-                  xmin = -7,
-                  ymin = 47,
+                  xmin = -6.3,
+                  ymin = 47.2,
                   xmax = -4,
                   ymax = 48,
-                  repertoire = rep_donnees_brutes)
+                  repertoire = repertoire_donnees_brutes)
 # ign_urba_tod(couche = "document")
 # ign_urba_tod(couche = "municipality")
 # ign_urba_tod(couche = "zone_urba")
