@@ -40,6 +40,7 @@ ign_urba_sauver_shape(objet_sf = assemblage,
                       chemin = fichier_donnees_traitees,
                       scr = 2154)
 
+# en une fois
 ma_couche <- "prescription_lin"
 repertoire_donnees_brutes <- "raw_data/prescription_lin"
 fichier_donnees_traitees <- "processed_data/prescription_lin.shp"

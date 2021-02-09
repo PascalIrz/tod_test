@@ -1,0 +1,51 @@
+---
+title: "Package {tod} - Introduction"
+author: "Pascal Irz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Package {tod} - Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Présentation du package
+
+Un *package* R regroupe un ensemble de fonctions. Celui-ci est nommé {tod} pour les initiales de "télécharger open data". A terme, il fournira un jeu assez fourni de fonctionalités pour importer des jeux de données ouvertes et leur appliquer des mises en formes minimales.
+
+Dans un premier temps, il ne permet que de manipuler les données du [Géoportail de l'Urbanisme](https://www.geoportail-urbanisme.gouv.fr/). Celui-ci offre des [services de téléchargement, de consultation ainsi que des API](https://www.geoportail-urbanisme.gouv.fr/services/).
+
+Les fonctions sont nommées de manière relativement explicite. Par exemple toutes celles préfixées par `ign_urba`, comme `ign_urba_lire_shapes()` concernent la chaîne de traitements dédiée au portail de l'urbanisme.
+
+Les étapes de chargement, mise en forme et d'exportation peuvent être soit réalisées pas à pas, soit enchaînées en utilisant une fonction intégratrice comme `ign_urba_api_shp()`, qui produit directement le shapefile à partir de la requête.
+
+# Installation
+
+## Configuration R et RStudio
+
+Se reporter à la description donnée au début du [tuto sur l'importation des données avec le package {aspe}](https://rpubs.com/kamoke/713407).
+
+## Téléchargement du package
+
+```{r, eval = FALSE}
+devtools::install_github("pascalirz/tod")
+```
+
+Activation du package
+
+```{r, eval = FALSE}
+library(tod)
+```
+
+Téléchargement éventuel des autres packages
+
+```{r, eval = FALSE}
+install.packages(pkgs = c("tidyverse", "sf", "mapview", "curl", "rgdal"))
+```
