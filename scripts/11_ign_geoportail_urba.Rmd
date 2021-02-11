@@ -120,6 +120,7 @@ sf_liste <- ign_urba_lire_shapes(repertoire = "../raw_data/prescription_lin")
 Dans cet exemple, la liste contient 2 objets qui contiennent chacun un certain nombre d'objets géographiques (`features`). 
 
 ![](../assets/sf_liste.png)
+
 Si l'on clique dessus on en sait plus :
 
 ![](../assets/sf_liste_2.png)
