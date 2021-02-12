@@ -33,6 +33,14 @@ Ces données sont mises à disposition par l'[API Hub'Eau - Hydrométrie](https:
 
 Le référentiel associé est [disponible en ligne](https://www.sandre.eaufrance.fr/notice-doc/r%C3%A9f%C3%A9rentiel-hydrom%C3%A9trique-3).
 
+La plupart des données sont rattachées à un site ou à une station de mesure. La sélection des stations peut être opérée de diverses manières :
+
+- Liste des codes des stations (encore faut-il les connaître)
+- Sélection géographique soit rectangulaire (`bbox`) soit circulaire (en indiquant les coordonnées du point central et un rayon)
+- Parfois sur l'appartenance à une entité administrative identifiée par son [Code Officiel Géographique (COG)](https://www.data.gouv.fr/fr/datasets/code-officiel-geographique-cog/).
+
+L'API ne permet pas de remonter au-delà d'un mois. Elle limite aussi le téléchargement à 20 000 données par requête.
+
 # Caractéristiques des stations
 
 Il est possible de collecter depuis l'API certaines données basiques sur les stations HYDRO. Il est possible de les sélectionner sur divers critères qui sont expliqués sur [la page de l'API](https://hubeau.eaufrance.fr/page/api-hydrometrie#/hydrometrie/sites). Par exemple si l'on s'intéresse aux stations de la région Bretagne (code Insee = 53) :
@@ -45,7 +53,7 @@ On peut aussi sélectionner selon un rectangle géographique. Dans ce cas le for
 
 - Ordre de saisie "min longitude, min latitude, max longitude, max latitude"
 - Coordonnées en WGS84 (EPSG:4326)
-- Séparateur décimal, 
+- Séparateur décimal
 
 ```{r}
 donnees_stations <- menv_bh_sta_tod(bbox = "-7, 46, -3, 48")
@@ -60,29 +68,41 @@ names(donnees_stations)
 Les premières lignes contiennent par exemple les informations suivantes (sélection de colonnes) :
 
 ```{r}
-donnees_stations %>% select(code_site, libelle_site, longitude_site, latitude_site, altitude_site,surface_bv, code_departement) %>% head(8) %>% DT::datatable()
+donnees_stations %>% select(code_site,
+                            libelle_site,
+                            longitude_site,
+                            latitude_site,
+                            altitude_site,
+                            surface_bv,
+                            code_departement) %>%
+  head() %>% # uniquement les premières lignes
+  DT::datatable()
 ```
 
 # Données temps réel
 
-Ces données sont mises à disposition par le module [Opérations sur les niveaux et les débits des cours d'eau en temps réel](https://hubeau.eaufrance.fr/page/api-hydrometrie#/hydrometrie/observations) de l'API Hub'Eau - Hydrométrie. Elles se rapportent à la station de mesure.
+Ces données de hauteur d'eau et de débit sont mises à disposition par le module [Opérations sur les niveaux et les débits des cours d'eau en temps réel](https://hubeau.eaufrance.fr/page/api-hydrometrie#/hydrometrie/observations) de l'API Hub'Eau - Hydrométrie. Elles se rapportent à la station de mesure.
 
-## Téléchargement
+## Pour une station
 
-Pour collecter les données associées à une station dont on connaît l'identifiant :
+### Téléchargement
+
+Pour collecter les données associées à une station dont on connaît l'identifiant, on utilise la fonction `menv_bh_htr_tod()` qui, par défaut, renvoie les données de débit et de hauteur.
 
 ```{r}
 data_sta <- menv_bh_htr_tod(code_entite = "J7010610")
 ```
 
-Par défaut, la fonction renvoir les 7 derniers jours de données, mais on peut en vouloir plus ou sur une période donnée. On peut aussi avoir besoin de la hauteur d'eau (mesure = "H") au lieu du débit (mesure = "Q") :
+On peut aussi avoir besoin du débit (mesure = "Q") et non de la hauteur d'eau (mesure = "H") :
 
 ```{r, eval = FALSE}
 data_sta <- menv_bh_htr_tod(code_entite = "J7010610",
                             grandeur_hydro = "H")
 ```
 
-## Structure du tableau
+Par défaut, la fonction renvoie les 10 000 dernières données.
+
+### Structure du tableau
 
 Visualisation des premières lignes du tableau.
 
@@ -92,17 +112,130 @@ data_sta %>%
   DT::datatable()
 ```
 
-Représentation graphique
+### Représentation graphique
 
 ```{r}
 debits <- menv_bh_htr_tod(code_entite = "J7010610",
                           grandeur_hydro = "Q") %>%
-  mutate(date_obs = lubridate::ymd_hms(date_obs) %>% as.Date()) # format de la date
+  mutate(date_obs = lubridate::ymd_hms(date_obs)) # format de la date
 
 ggplot(data = debits, aes(x = date_obs, y = resultat_obs)) +
   geom_point() +
-  scale_x_date(date_labels = "%d/%m") + # mef étiquettes des graduation
+  geom_smooth() + # courbe de tendance
+  scale_x_datetime(date_labels = "%d/%m") + # étiquette axe des dates
   labs(x = "", y = bquote('Débit ('*m^3/s*')')) # légendes des axes
-  
 ```
+
+## Pour plusieurs stations
+
+En reprenant la sélection géographique rectangulaire précédente des stations, on peut collecter les identifiants des stations. On peut aussi procéder à partir du nom du cours d'eau s'il n'y a pas d'ambiguité, comme par exemple pour l'Aff, affluent de la Vilaine :
+
+
+```{r}
+stations <- menv_bh_sta_tod(libelle_cours_eau = "Aff")
+```
+
+Les identifiants de ces stations sont les suivants :
+
+```{r}
+stations_id <- stations %>% 
+  pull(code_site)  %>% 
+  unique()
+```
+
+Où sont-elles situées ?
+
+```{r, fig.align = 'center', fig.width = 6, fig.height = 6}
+stations %>% 
+  sf::st_as_sf(coords = c("longitude_site", "latitude_site"), crs = 4326) %>% 
+  mapview::mapview(map.types = "OpenStreetMap")
+
+```
+
+Collecte des données
+
+La liste des stations `stations_id` est un vecteur qui contient `r length(stations_id)` éléments de classe `r class(stations_id)`.
+
+```{r}
+stations_id
+length(stations_id)
+```
+
+Il faut la mettre en forme pour qu'elle soit acceptée par l'API, c'est-à-dire en une chaîne de caractères séparés par des virgules.
+
+```{r}
+stations_id <- paste(stations_id, collapse = ",")
+```
+
+Vérification.
+
+```{r}
+stations_id
+length(stations_id)
+```
+
+Chargement des données.
+L'API n'accepte pas le paramètre `timestep` (le pas de temps) quand la donnée collectée couvre plusieurs stations. C'est dommage car par défaut il est de 10' et limité à l'intervalle [10,60]. En le passant à 60' on aurait pu avec les 10 000 valeurs charger une période 6 fois plus longue ...
+
+```{r}
+debits <- menv_bh_htr_tod(code_entite = stations_id,
+                          grandeur_hydro = "Q") %>%
+  mutate(date_obs = lubridate::ymd_hms(date_obs)) # format de la date
+```
+
+Combien de données par station ?
+
+```{r}
+debits %>% 
+  pull(code_site) %>% 
+  table()
+```
+
+En fait une des trois stations ne fournit pas de données de débit (du moins en ce moment).
+
+Pour la mise en forme, il est plus lisible d'afficher les noms des stations plutôt que leurs codes.
+
+```{r}
+debits <- debits %>% 
+  left_join(y = stations %>% select(code_site, libelle_site))
+```
+
+
+```{r, fig.width = 9}
+ggplot(data = debits, aes(x = date_obs, y = resultat_obs)) +
+  geom_point() +
+  scale_x_datetime(date_labels = "%d/%m") + # étiquette axe des dates
+  labs(x = "", y = "Débit") + # légendes des axes
+  facet_wrap(~ libelle_site, scales = 'free_y')
+```
+
+Et si l'on veut des chroniques plus longues ?
+
+L'API permet au maximum de remonter sur un mois. 
+
+Il faut télécherger séparément les chroniques par station, puis les assembler. Ainsi on peut obtenir jusqu'à 10 000 données par station et on peut employer le paramètre `timestep`. 
+
+Cette fois-ci il nous faut les identifiants des stations en vecteur pour itérer sur les valeurs de ce vecteur.
+
+```{r}
+stations_id <- stations %>%
+  pull(code_site) %>%
+  unique
+```
+
+
+```{r}
+debits_plusieurs_stations <- menv_bh_htr_tod_ext(stations_id = stations_id) %>% 
+  mutate(date_obs = lubridate::ymd_hms(date_obs)) %>%  # format de la date
+  left_join(y = stations %>% select(code_site, libelle_site))
+```
+
+```{r, fig.width = 9}
+ggplot(data = debits_plusieurs_stations, aes(x = date_obs, y = resultat_obs)) +
+  geom_point() +
+  scale_x_datetime(date_labels = "%d/%m") + # étiquette axe des dates
+  labs(x = "", y = "Débit") + # légendes des axes
+  facet_wrap(~ libelle_site, scales = 'free_y')
+```
+
 
