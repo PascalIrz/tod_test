@@ -160,8 +160,9 @@ stations_id <- stations %>%
 Où sont-elles situées ?
 
 ```{r, fig.align = 'center', fig.width = 6, fig.height = 6}
-stations %>% 
-  sf::st_as_sf(coords = c("longitude_site", "latitude_site"), crs = 4326) %>% 
+stations %>%
+  sf::st_as_sf(coords = c("longitude_site", "latitude_site"),
+               crs = 4326) %>%
   mapview::mapview(map.types = "OpenStreetMap")
 
 ```
@@ -188,15 +189,18 @@ class(stations_id) # classe du vecteur
 Chargement des données.
 
 >NB Cette étape prend de une à quelques secondes par station. C'est ici que les erreurs '500' sont les plus fréquentes. Dans ce cas, recommencer.
+
 ```{r, echo = FALSE}
 load(file = "../processed_data/debits_plusieurs_stations.RData")
 ```
 
 
 ```{r, eval = FALSE}
-debits_plusieurs_stations <- menv_bh_htr_tod(stations_id = stations_id) %>% 
+debits_plusieurs_stations <-
+  menv_bh_htr_tod(stations_id = stations_id) %>%
   mutate(date_obs = lubridate::ymd_hms(date_obs)) %>%  # format de la date
-  left_join(y = stations %>% select(code_site, libelle_site))
+  left_join(y = stations %>%
+              select(code_site, libelle_site))
 ```
 Combien de données par station ?
 
@@ -219,8 +223,8 @@ ggplot(data = debits_plusieurs_stations, aes(x = date_obs, y = resultat_obs)) +
   geom_line() +
   scale_x_datetime(date_labels = "%d/%m") + # étiquette axe des dates
   labs(x = "", y = "Débit") + # légendes des axes
-  facet_wrap( ~ str_wrap(libelle_site, 25), # renvoi à la ligne si les noms des stations sont longs
-              scales = 'free_y', # l'échelle verticale est différente pour chaque station
+  facet_wrap( ~ str_wrap(libelle_site, 25), # renvoi à la ligne si noms de stations trop longs
+              scales = 'free_y', # échelle verticale est différente pour chaque station
               ncol = 4) + # nb de colonnes
   coord_cartesian(ylim = c(0, NA)) + # l'axe des débits commence à zéro
   theme(text = element_text(size = 9)) # taille de la police

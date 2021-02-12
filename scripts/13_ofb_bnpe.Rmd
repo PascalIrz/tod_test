@@ -1,0 +1,99 @@
+---
+title: "Package {tod} - BNPE"
+author: "Pascal Irz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Package {tod} - BNPE}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  cache = FALSE,
+  comment = "#>"
+)
+```
+
+Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées.
+
+La présentation générale du `package {tod}` est disponible [ici](https://rpubs.com/kamoke/723467).
+
+Activation des `packages`.
+
+```{r, message = FALSE, warning = FALSE}
+library(tod)
+library(tidyverse)
+```
+
+# Contenu
+
+Les données de la [banque nationale des prélèvements quantitatifs en eau (BNPE)](https://bnpe.eaufrance.fr/presentation) sont mises à disposition par l'[API Hub'Eau - Prélèvements d'eau](https://hubeau.eaufrance.fr/page/api-prelevements-eau).
+
+>**NB En février 2021, cette API est en version bêta.**
+
+Le référentiel associé est [disponible en ligne](https://bnpe.eaufrance.fr/boite-a-outils).
+
+La plupart des données sont rattachées à un point de prélèvement. La sélection des points peut être opérée de diverses manières :
+
+- Liste des codes des points ou des ouvrages (encore faut-il les connaître).
+- Appartenance à une entité administrative identifiée par son [Code Officiel Géographique (COG)](https://www.data.gouv.fr/fr/datasets/code-officiel-geographique-cog/).
+- Appartenance à une zone Hydro.
+- La sélection géographique rectangulaire (`bbox`) sera effective plus tard dans l'API mais elle est déjà prévue dans la fonction `ofb_bnpe_pp_tod()`.
+
+L'API limite le téléchargement à 20 000 données par requête.
+
+>Il se peut aussi qu'au bout d'un moment un message d'erreur "HTTP error 502" ou "504" vous soit retourné. 
+
+![](../assets/erreur_502.png)
+
+Dans ce cas des codes erreurs dans la gamme des 500, c'est le serveur qui n'a pas réussi à traiter correctement votre requête ou que la connexion est mauvaise. **Normalement en recommençant ça finit par passer**.
+
+Les fonctions du `package` utilisées ici sont toutes préfixées `menv_bh` en référence au founrisseur de la donnée, le Ministère de l'Environnement (`menv`) et à la source, la banque HYDRO (`bh`).
+
+
+L'API propose trois types d'informations (d'après le site de l'API) :
+
+- Les chroniques annuelles de volumes prélevés par ouvrage.  
+- La liste des ouvrages de prélèvement en eau qui permet de récupérer la description des ouvrages de prélèvement. Un ouvrage est composé d'un ou plusieurs points de prélèvement proches, de même type, captant la même ressource en eau, destinés au même usage principal et placés sous la propriété d'un même maître d'ouvrage. Les données de volumes annuels prélevés sont rattachées aux ouvrages et non aux points de prélèvement.  
+- La liste des points de prélèvement en eau qui permet de récupérer la description des points de prélèvement. Un point de prélèvement fait obligatoirement partie d'un ouvrage. Il peut constituer un ouvrage à lui seul, ou bien être accompagné d'autres points de prélèvement.
+
+# Caractéristiques des stations
+
+L'API donne accès à certaines données basiques sur les stations HYDRO. Il est possible de sélectionner les stations sur divers critères qui sont expliqués sur [la page de l'API](https://hubeau.eaufrance.fr/page/api-hydrometrie#/hydrometrie/sites). Par exemple, on peut sélectionner selon un rectangle géographique. Dans ce cas le format est imposé :
+
+- Ordre de saisie "min longitude, min latitude, max longitude, max latitude"
+- Coordonnées en WGS84 (EPSG:4326)
+- Séparateur décimal
+
+```{r, eval = FALSE}
+donnees_stations <- menv_bh_sta_tod(bbox = "-7, 46, -3, 48")
+```
+
+Autre exemple, si l'on s'intéresse aux stations de la région Bretagne (code Insee = 53) :
+
+```{r, eval = TRUE}
+donnees_stations <- menv_bh_sta_tod(code_region = 53)
+```
+
+On obtient un tableau de `r nrow(donnees_stations)` lignes et `r ncol(donnees_stations)` colonnes nommées :
+
+```{r}
+names(donnees_stations)
+```
+
+Les premières lignes contiennent par exemple les informations suivantes (sélection de colonnes) :
+
+```{r}
+donnees_stations %>% select(code_site,
+                            libelle_site,
+                            longitude_site,
+                            latitude_site,
+                            altitude_site,
+                            surface_bv,
+                            code_departement) %>%
+  head() %>% # uniquement les premières lignes
+  DT::datatable()
+```
