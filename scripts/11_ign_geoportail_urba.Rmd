@@ -45,6 +45,8 @@ Les couches SIG proposées sont les suivantes :
 
 Elles peuvent être utilisées en flux WMS ou bien téléchargées. La volumétrie est toutefois importante dès lors que l'emprise géographique est conséquente (un département ou une région), ce qui ralentit le flux. Sur de telles emprises géographiques il est donc plus facile de télécharger les données pour travailler en local.
 
+Les étapes de chargement, mise en forme et d'exportation peuvent être soit réalisées pas à pas, soit enchaînées en utilisant une fonction intégratrice comme `ign_urba_api_shp()`, qui produit directement un shapefile à partir de la requête.
+
 # Etape par étape
 
 ## Téléchargement

@@ -18,13 +18,14 @@ knitr::opts_chunk$set(
 
 # Présentation du package
 
-Un *package* R regroupe un ensemble de fonctions. Celui-ci est nommé {tod} pour les initiales de "télécharger open data". A terme, il fournira un jeu assez fourni de fonctionalités pour importer des jeux de données ouvertes et leur appliquer des mises en formes minimales.
+Un *package* R regroupe un ensemble de fonctions. Celui-ci est nommé `{tod}` pour les initiales de "télécharger open data". A terme, il fournira un jeu assez fourni de fonctionalités pour importer des jeux de données ouvertes et leur appliquer des mises en formes minimales.
 
-Dans un premier temps, il ne permet que de manipuler les données du [Géoportail de l'Urbanisme](https://www.geoportail-urbanisme.gouv.fr/). Celui-ci offre des [services de téléchargement, de consultation ainsi que des API](https://www.geoportail-urbanisme.gouv.fr/services/).
+Dans un premier temps, il  permet que de manipuler les données :
 
-Les fonctions sont nommées de manière relativement explicite. Par exemple toutes celles préfixées par `ign_urba`, comme `ign_urba_lire_shapes()` concernent la chaîne de traitements dédiée au portail de l'urbanisme.
+- du [Géoportail de l'Urbanisme](https://www.geoportail-urbanisme.gouv.fr/). Celui-ci offre des [services de téléchargement, de consultation ainsi que des API](https://www.geoportail-urbanisme.gouv.fr/services/).
+- de la [base HYDRO](http://hydro.eaufrance.fr/).
 
-Les étapes de chargement, mise en forme et d'exportation peuvent être soit réalisées pas à pas, soit enchaînées en utilisant une fonction intégratrice comme `ign_urba_api_shp()`, qui produit directement le shapefile à partir de la requête.
+Les fonctions sont nommées de manière relativement explicite. Par exemple toutes celles préfixées par `ign_urba`, comme `ign_urba_lire_shapes()` concernent la chaîne de traitements dédiée au portail de l'urbanisme. La première partie du préfixe indique l'organisme fournisseur de la donnée, la seconde le nom de la base.
 
 # Installation
 

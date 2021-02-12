@@ -12,7 +12,7 @@
 
 <meta name="author" content="Pascal Irz" />
 
-<meta name="date" content="2021-02-09" />
+<meta name="date" content="2021-02-12" />
 
 <title>Package {tod} - Introduction</title>
 
@@ -325,16 +325,19 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Package {tod} - Introduction</h1>
 <h4 class="author">Pascal Irz</h4>
-<h4 class="date">2021-02-09</h4>
+<h4 class="date">2021-02-12</h4>
 
 
 
 <div id="présentation-du-package" class="section level1">
 <h1>Présentation du package</h1>
-<p>Un <em>package</em> R regroupe un ensemble de fonctions. Celui-ci est nommé {tod} pour les initiales de “télécharger open data”. A terme, il fournira un jeu assez fourni de fonctionalités pour importer des jeux de données ouvertes et leur appliquer des mises en formes minimales.</p>
-<p>Dans un premier temps, il ne permet que de manipuler les données du <a href="https://www.geoportail-urbanisme.gouv.fr/">Géoportail de l’Urbanisme</a>. Celui-ci offre des <a href="https://www.geoportail-urbanisme.gouv.fr/services/">services de téléchargement, de consultation ainsi que des API</a>.</p>
-<p>Les fonctions sont nommées de manière relativement explicite. Par exemple toutes celles préfixées par <code>ign_urba</code>, comme <code>ign_urba_lire_shapes()</code> concernent la chaîne de traitements dédiée au portail de l’urbanisme.</p>
-<p>Les étapes de chargement, mise en forme et d’exportation peuvent être soit réalisées pas à pas, soit enchaînées en utilisant une fonction intégratrice comme <code>ign_urba_api_shp()</code>, qui produit directement le shapefile à partir de la requête.</p>
+<p>Un <em>package</em> R regroupe un ensemble de fonctions. Celui-ci est nommé <code>{tod}</code> pour les initiales de “télécharger open data”. A terme, il fournira un jeu assez fourni de fonctionalités pour importer des jeux de données ouvertes et leur appliquer des mises en formes minimales.</p>
+<p>Dans un premier temps, il permet que de manipuler les données :</p>
+<ul>
+<li>du <a href="https://www.geoportail-urbanisme.gouv.fr/">Géoportail de l’Urbanisme</a>. Celui-ci offre des <a href="https://www.geoportail-urbanisme.gouv.fr/services/">services de téléchargement, de consultation ainsi que des API</a>.</li>
+<li>de la <a href="http://hydro.eaufrance.fr/">base HYDRO</a>.</li>
+</ul>
+<p>Les fonctions sont nommées de manière relativement explicite. Par exemple toutes celles préfixées par <code>ign_urba</code>, comme <code>ign_urba_lire_shapes()</code> concernent la chaîne de traitements dédiée au portail de l’urbanisme. La première partie du préfixe indique l’organisme fournisseur de la donnée, la seconde le nom de la base.</p>
 </div>
 <div id="installation" class="section level1">
 <h1>Installation</h1>
