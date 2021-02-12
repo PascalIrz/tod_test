@@ -188,7 +188,6 @@ class(stations_id) # classe du vecteur
 Chargement des données.
 
 >NB Cette étape prend de une à quelques secondes par station. C'est ici que les erreurs '500' sont les plus fréquentes. Dans ce cas, recommencer.
-
 ```{r, echo = FALSE}
 load(file = "../processed_data/debits_plusieurs_stations.RData")
 ```
