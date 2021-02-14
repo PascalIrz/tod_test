@@ -51,49 +51,49 @@ L'API limite le téléchargement à 20 000 données par requête.
 
 Dans ce cas des codes erreurs dans la gamme des 500, c'est le serveur qui n'a pas réussi à traiter correctement votre requête ou que la connexion est mauvaise. **Normalement en recommençant ça finit par passer**.
 
-Les fonctions du `package` utilisées ici sont toutes préfixées `menv_bh` en référence au founrisseur de la donnée, le Ministère de l'Environnement (`menv`) et à la source, la banque HYDRO (`bh`).
+Les fonctions du `package` utilisées ici sont toutes préfixées `ofb_bnpe` en référence au fournisseur de la donnée, l'Office Français de la Biodiversiré (`ofb`) et à la source, la banque nationale des prélèvements en eau (`bnpe`).
 
 
-L'API propose trois types d'informations (d'après le site de l'API) :
+L'API propose trois types d'informations (d'après le site dédié) :
 
 - Les chroniques annuelles de volumes prélevés par ouvrage.  
 - La liste des ouvrages de prélèvement en eau qui permet de récupérer la description des ouvrages de prélèvement. Un ouvrage est composé d'un ou plusieurs points de prélèvement proches, de même type, captant la même ressource en eau, destinés au même usage principal et placés sous la propriété d'un même maître d'ouvrage. Les données de volumes annuels prélevés sont rattachées aux ouvrages et non aux points de prélèvement.  
 - La liste des points de prélèvement en eau qui permet de récupérer la description des points de prélèvement. Un point de prélèvement fait obligatoirement partie d'un ouvrage. Il peut constituer un ouvrage à lui seul, ou bien être accompagné d'autres points de prélèvement.
 
-# Caractéristiques des stations
+# Caractéristiques des points de prélèvement
 
-L'API donne accès à certaines données basiques sur les stations HYDRO. Il est possible de sélectionner les stations sur divers critères qui sont expliqués sur [la page de l'API](https://hubeau.eaufrance.fr/page/api-hydrometrie#/hydrometrie/sites). Par exemple, on peut sélectionner selon un rectangle géographique. Dans ce cas le format est imposé :
-
-- Ordre de saisie "min longitude, min latitude, max longitude, max latitude"
-- Coordonnées en WGS84 (EPSG:4326)
-- Séparateur décimal
-
-```{r, eval = FALSE}
-donnees_stations <- menv_bh_sta_tod(bbox = "-7, 46, -3, 48")
-```
-
-Autre exemple, si l'on s'intéresse aux stations de la région Bretagne (code Insee = 53) :
+L'API donne accès à certaines données basiques sur les points de prélèvement.
 
 ```{r, eval = TRUE}
-donnees_stations <- menv_bh_sta_tod(code_region = 53)
+pts_prel <- ofb_bnpe_pp_tod(code_departement = 35)
 ```
 
-On obtient un tableau de `r nrow(donnees_stations)` lignes et `r ncol(donnees_stations)` colonnes nommées :
+On obtient un tableau de `r nrow(pts_prel)` lignes et `r ncol(pts_prel)` colonnes nommées :
 
 ```{r}
-names(donnees_stations)
+names(pts_prel)
 ```
 
 Les premières lignes contiennent par exemple les informations suivantes (sélection de colonnes) :
 
 ```{r}
-donnees_stations %>% select(code_site,
-                            libelle_site,
-                            longitude_site,
-                            latitude_site,
-                            altitude_site,
-                            surface_bv,
-                            code_departement) %>%
+pts_prel %>% select(code_point_prelevement,
+                            nom_point_prelevement,
+                            nom_commune,
+                            code_departement,
+                            code_zone_hydro,
+                            nappe_accompagnement,
+                            code_bss_point_eau) %>%
   head() %>% # uniquement les premières lignes
   DT::datatable()
 ```
+
+
+[1] "code_point_prelevement"      "nom_point_prelevement"      
+#>  [3] "date_exploitation_debut"     "date_exploitation_fin"      
+#>  [5] "code_type_milieu"            "libelle_type_milieu"        
+#>  [7] "code_nature"                 "libelle_nature"             
+#>  [9] "lieu_dit"                    "code_precision_coord"       
+#> [11] "libelle_precision_coord"     "commentaire"                
+#> [13] "code_commune_insee"          "nom_commune"                
+#> [15] "code_departement"          
