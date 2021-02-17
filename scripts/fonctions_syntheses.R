@@ -22,10 +22,10 @@ get_1_sta <- function(syntheses, indexes_debut, indexes_fin, i, nom_liste = "lis
 
 }
 
-yo <- get_1_sta(syntheses = syntheses,
-                indexes_debut = indexes_debut,
-                indexes_fin = indexes_fin,
-                i = 1)
+# yo <- get_1_sta(syntheses = syntheses,
+#                 indexes_debut = indexes_debut,
+#                 indexes_fin = indexes_fin,
+#                 i = 1)
 # -------------------------------------------------------------
 # fonction pour scinder les synthèses par station
 # -------------------------------------------------------------
@@ -49,7 +49,7 @@ scinder_syntheses <- function(syntheses) {
 
 }
 
-liste <- scinder_syntheses(syntheses = syntheses)
+#liste <- scinder_syntheses(syntheses = syntheses)
 
 # -------------------------------------------------------------
 # fonction interne de nommage des synthèses par les codes stations
@@ -68,7 +68,7 @@ nommer_liste <- function(liste) {
 
 }
 
-liste <- nommer_liste(liste)
+#liste <- nommer_liste(liste)
 
 # -------------------------------------------------------------
 # Extraire un bloc de la synthèse d'une station
@@ -125,8 +125,14 @@ extraire_bloc <- function(synthese, pattern_debut, nb_lignes) {
 bloc_to_dfs <- function(bloc) {
 
   bloc[2:length(bloc)] %>% # récupération données moins la ligne de titres
-    str_replace(pattern = '\\s*\\([^\\)]+\\)', # supprimer ce qui est entre parenthèses
-                replacement = '') %>% # càd les unités qui contiennent des chiffres
+    map(.f = str_replace,
+        pattern = '\\s*\\([^\\)]+\\)', # supprimer ce qui est entre parenthèses
+        replacement = '') %>%
+#         str_replace(pattern = '\\s*\\([^\\)]+\\)', # supprimer ce qui est entre parenthèses
+#                 replacement = '') %>% # càd les unités qui contiennent des chiffres
+# #    #qdap::bracketX() %>%
+ #   str_replace(pattern = '\\([^\\(\\)]*\\)', # supprimer ce qui est entre parenthèses
+#                replacement = '') %>% # càd les unités qui contiennent des chiffres
     str_split(pattern = ";") %>% # scission
     str_match_all("[0-9.]+") %>% # récupération des chiffres
     map(.f = as.data.frame) # passage en dataframe
@@ -135,15 +141,17 @@ bloc_to_dfs <- function(bloc) {
 
 
 
-# --------------------------------------------------------------
-parser_bloc <- function(bloc, noms_colonnes, noms_lignes)
+# -------------------------------------------------------------
+# Parser la liste de df pour obtenir un unique df
+# -------------------------------------------------------------
+parser_bloc <- function(bloc, noms_colonnes, noms_lignes, total_annuel = FALSE)
 
 {
 
   data <- bloc %>%
     bloc_to_dfs()
 
-  if (nrow(data[[1]]) > 12) # cas des données mensuelles + annuelle à la fin
+  if (total_annuel == TRUE) # cas des données mensuelles + annuelle à la fin
 
       {
 
@@ -171,96 +179,16 @@ parser_bloc <- function(bloc, noms_colonnes, noms_lignes)
 
 
 
-
 # -------------------------------------------------------------
-# modules interannuels
+# Ajouter des suffixes aux noms de colonnes (cas des intervalles de confiance)
 # -------------------------------------------------------------
+suffixer_colonnes <- function(noms_colonnes, suffixes = c("est", "min", "max")) {
 
-ligne_debut <- ma_synthese %>%
-  stringi::stri_detect_fixed(pattern = "Modules interannuels") %>%
-  which()
-
-data <- ma_synthese[(1 + ligne_debut):(4 + ligne_debut)] %>%
-  str_split(pattern = ";")
-
-noms_colonnes <- data[[1]] %>%
-  .[.!=''] # suppression des vides
-
-suffixes <- c("est", "min", "max")
-
-noms_colonnes <- map(.x = noms_colonnes,
-                     .f = paste,
-                     suffixes) %>%
-  unlist()
+  map(.x = noms_colonnes,
+      .f = paste,
+      suffixes) %>%
+    unlist()
 
 
-# données mi
+}
 
-mi <- data[2] %>%
-  str_replace(pattern = '\\s*\\([^\\)]+\\)',
-              replacement = '') %>% # supprimer les unités qui contiennent des chiffres
-  str_split(pattern = ";") %>%
-  str_match_all("[0-9.]+") %>%
-  as.data.frame(row.names = noms_colonnes) %>%
-  purrr::set_names("Débit (m3/s)") %>%
-  t()
-
-# données module (moyenne)
-
-mm <- data[4] %>%
-  str_replace(pattern = '\\s*\\([^\\)]+\\)',
-              replacement = '') %>% # supprimer les unités qui contiennent des chiffres
-  str_split(pattern = ";") %>%
-  str_match_all("[0-9.]+") %>%
-  as.data.frame(row.names = c('module moyenne est', 'module moyenne min', 'module moyenne max')) %>%
-  purrr::set_names("Débit (m3/s)") %>%
-  t()
-
-module <- cbind(mm, mi) %>%
-  as.data.frame()
-
-rm(mi, mm)
-
-# -------------------------------------------------------------
-# Basses eaux
-# -------------------------------------------------------------
-
-ligne_debut <- ma_synthese %>%
-  stringi::stri_detect_fixed(pattern = "Ecoulements mensuels") %>%
-  which()
-
-data <- ma_synthese[(1 + ligne_debut):(4 + ligne_debut)] %>%
-  str_split(pattern = ";")
-
-# mois
-# mois <- ma_synthese[1 + ligne_debut] %>%
-#   str_split(pattern = ";")
-
-index_mois <- seq(from = 2, to = 24, by = 2)
-
-mois <- data[[1]][index_mois]
-variables <- map(.x = data[2:4],
-                 .f = function(x) x[1]) %>%
-  unlist()
-
-# données
-
-dm <- data[2:4] %>%
-  str_replace(pattern = '\\s*\\([^\\)]+\\)',
-              replacement = '') %>% # supprimer les unités qui contiennent des chiffres
-  str_split(pattern = ";") %>%
-  str_match_all("[0-9.]+") %>%
-  map(.f = as.data.frame,
-      row.names = mois) %>%
-  map(.f = slice,
-      n = -n()) %>%
-  map(.f = t) %>%
-  reduce(rbind) %>%
-  as.data.frame(row.name = FALSE)
-
-
-dm <- dm %>%
-  purrr::set_names(mois) %>%
-  mutate(variable = variables) %>%
-  column_to_rownames(var = "variable") %>%
-  mutate_all(as.numeric)
