@@ -20,10 +20,11 @@ knitr::opts_chunk$set(
 
 Un *package* R regroupe un ensemble de fonctions. Celui-ci est nommé `{tod}` pour les initiales de "télécharger open data". A terme, il fournira un jeu assez fourni de fonctionalités pour importer des jeux de données ouvertes et leur appliquer des mises en formes minimales.
 
-Dans un premier temps, il permet que de manipuler les données :
+Pour le moment il permet de :
 
-- du [Géoportail de l'Urbanisme](https://rpubs.com/kamoke/723482).
-- de la [banque HYDRO](https://rpubs.com/kamoke/723965).
+- manipuler les données du [Géoportail de l'Urbanisme](https://rpubs.com/kamoke/723482)
+- télécharger, agréger et simplifier le découpage administratif de la France
+- télécharger, agréger et simplifier le découpage hydrographique de la France, par exemple pour [calculer la richesse en espèces de poissons par bassin versant](https://rpubs.com/kamoke/753331).
 
 Les fonctions sont nommées de manière relativement explicite. Par exemple toutes celles préfixées par `ign_urba`, comme `ign_urba_lire_shapes()` concernent la chaîne de traitements dédiée au portail de l'urbanisme. La première partie du préfixe indique l'organisme fournisseur de la donnée, la seconde le nom de la base.
 
