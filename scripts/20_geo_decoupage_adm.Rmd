@@ -1,0 +1,97 @@
+---
+title: "Package {tod} - Découpage administratif"
+author: "Pascal Irz"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  cache = FALSE,
+  comment = "#>"
+)
+```
+
+Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées.
+
+Activation des `packages` :
+
+```{r}
+library(tod)
+library(tidyverse)
+```
+
+# Découpage administratif mondial
+
+Le [projet GADM](https://gadm.org/index.html) vise à cartographier le découpage administratif de l'ensemble des pays du monde, à chacun des niveaux de finesse. Ses données sont en libre accès sauf pour usage commercial et le [package `GADMTools`](https://github.com/Epiconcept-Paris/GADMTools) simplifie l'utilisation de ses données. Un [tutoriel en français](https://delladata.fr/dessinez-des-cartes-administratives-avec-gadmtools/) existe pour ce package.
+
+La fonction `gadm_sf_loadCountries()` permet de charger la carte pour un (ou plusieurs) pays en spécifiant la finesse du découpage par l'argument `level`. Le niveau `level = 0` retourne les frontières du pays. Pour la France, `level = 1`, retourne les régions, `level = 2` les départements, etc.
+
+```{r, message = FALSE}
+library(GADMTools)
+depts_fr <- gadm_sf_loadCountries("FRA",
+                                  level = 2 )
+```
+
+La visualisation de l'objet retourné prévue dans le package :
+
+```{r}
+gadm_plot(depts_fr)
+```
+
+Cet objet comprend plusieurs éléments :
+
+```{r}
+names(depts_fr)
+```
+
+On peut donc extraire le `slot` nommé `sf` qui est un objet spatial facilement manipulable avec le package `sf` et visualisable avec `mapview()`.
+
+```{r}
+mapview::mapview(depts_fr$sf)
+```
+
+# Découpage France d'après OpenStreetMap
+
+Ces données sont diffusées sur la plateforme [www.data.gouv.fr](www.data.gouv.fr).
+
+
+```{r}
+# url <- "https://www.data.gouv.fr/fr/datasets/r/a01aff2a-8f36-4a77-a73f-efc212fe2899"
+# depts <- osm_depts_tod(url = url,
+#                        repertoire = "../raw_data",
+#                        crs_sortie = 2154)
+```
+
+```{r}
+# depts %>% 
+#   filter(str_length(code_insee) == 2) %>%  # périmètre métropole
+#   ggplot() +
+#     geom_sf()
+```
+
+```{r}
+url <- "https://www.data.gouv.fr/fr/datasets/r/07b7c9a2-d1e2-4da6-9f20-01a7b72d4b12"
+communes <- osm_communes_tod(url = url,
+                             repertoire = "../raw_data",
+                             crs_sortie = 2154)
+```
+
+Les communes de la Corse-du-Sud :
+
+```{r}
+communes %>% 
+  filter(str_sub(insee, 1, 2) == "2A") %>% 
+  mapview::mapview()
+```
+
+Rattachement des départements aux régions
+
+```{r}
+# corres <- tod::df_dept_reg()
+# 
+# depts <- depts %>% 
+#   left_join(y = corres)
+
+```

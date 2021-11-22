@@ -2,11 +2,7 @@
 title: "Package {tod} - Géoportail de l'urbanisme"
 author: "Pascal Irz"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Package {tod} - Géoportail de l'urbanisme}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r setup, include = FALSE}
@@ -17,18 +13,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées.
 
-Activation des `packages`.
 
-```{r, message = FALSE, warning = FALSE}
-library(tod)
-library(tidyverse)
-```
-
-# Contenu
-
-Le [Géoportail de l'Urbanisme](https://www.geoportail-urbanisme.gouv.fr/) offre des [services de téléchargement, de consultation ainsi que des API](https://www.geoportail-urbanisme.gouv.fr/services/).
+Le [Géoportail de l’Urbanisme](https://www.geoportail-urbanisme.gouv.fr/) offre des [services de téléchargement, de consultation ainsi que des API](https://www.geoportail-urbanisme.gouv.fr/services/).
 
 Les couches SIG proposées sont les suivantes :
 
@@ -43,41 +30,51 @@ Les couches SIG proposées sont les suivantes :
 - info_pct
 - info_surf
 
-Elles peuvent être utilisées en flux WMS ou bien téléchargées. La volumétrie est toutefois importante dès lors que l'emprise géographique est conséquente (un département ou une région), ce qui ralentit le flux. Sur de telles emprises géographiques il est donc plus facile de télécharger les données pour travailler en local.
+Elles peuvent être utilisées en flux ou bien téléchargées. La volumétrie est toutefois importante dès lors que l'emprise géographique est conséquente (un département ou une région). Sur de telles emprises géographiques il est donc plus facile de télécharger les données pour travailler en local.
 
-Les étapes de chargement, mise en forme et d'exportation peuvent être soit réalisées pas à pas, soit enchaînées en utilisant une fonction intégratrice comme `ign_urba_api_shp()`, qui produit directement un shapefile à partir de la requête.
+Les étapes de chargement, mise en forme et d’exportation peuvent être soit réalisées pas à pas, soit enchaînées en utilisant la fonction intégratrice `tgeo_ign_urba()`, qui produit directement un shapefile.
+
+# Configuration
+
+Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées. Si ce n'est pas le cas se reporter à [ces explications](https://rpubs.com/kamoke/723467).
+
+Activation des `packages` :
+
+```{r, message=F, warning=F}
+library(tod)
+library(tidyverse)
+library(mapview)
+```
 
 # Etape par étape
 
 ## Téléchargement
 
-L'exemple donné consiste à télécharger les prescriptions linéaires, nommées "prescription_lin" sur le géoportail. On conserve par défaut le répertoire de stockage des données brutes `("raw_data/prescription_surf")`.
+L'exemple donné consiste à télécharger les prescriptions linéaires, nommées "prescription_lin" sur le géoportail. On stocke les données brutes dans le sous-répertoire `("raw_data/prescription_lin")` du répertoire de travail.
 
-L'emprise géographique est définie par un cadre rectangulaire de coordonnées WGS84 (en degrés, point décimal). Les longitudes ouest sont en négatif. 
+L'emprise géographique est définie par un cadre rectangulaire. Les longitudes ouest sont en négatif. 
 
 ```{r, eval = FALSE}
 tod::ign_urba_tod(couche = "prescription_lin",
                   xmin = -7,
-                  ymin = 47.2,
-                  xmax = -4.2,
-                  ymax = 48)
-```
-
-```{r, echo = FALSE, eval = TRUE}
-tod::ign_urba_tod(couche = "prescription_lin",
-                  xmin = -6.3,
-                  ymin = 47.2,
+                  ymin = 47.5,
                   xmax = -4,
                   ymax = 48,
-                  repertoire = "../raw_data/prescription_lin")
+                  repertoire_donnees_brutes = "raw_data/prescription_lin")
 ```
 
-Il se peut qu'au bout d'un moment un message d'erreur "HTTP error 502" ou "504" vous soit retourné. 
+```{r, echo = FALSE}
+tod::ign_urba_tod(couche = "prescription_lin",
+                  xmin = -7,
+                  ymin = 47.5,
+                  xmax = -4,
+                  ymax = 48,
+                  repertoire_donnees_brutes = "../raw_data/prescription_lin")
+```
+
+Il se peut qu'au bout d'un moment un message d'erreur "HTTP error 502" ou "504" vous soit retourné. Dans ce cas, c'est le serveur qui n'a pas réussi à traiter correctement votre requête ou que la connexion est mauvaise. Normalement en recommençant ça finit par passer. 
 
 ![](../assets/erreur_502.png)
-
-Dans ce cas des codes erreurs dans la gamme des 500, c'est le serveur qui n'a pas réussi à traiter correctement votre requête ou que la connexion est mauvaise. Normalement en recommençant ça finit par passer. 
-
 A l'issue du téléchargement, on peut vérifier que les fichiers compressés sont bien à leur place.
 
 ![](../assets/explorateur_1.png)
@@ -87,12 +84,13 @@ A l'issue du téléchargement, on peut vérifier que les fichiers compressés so
 Il suffit d'indiquer à la fonction `ign_urba_dec()` le chemin vers le répertoire où sont les fichiers compressés.
 
 ```{r, eval = FALSE}
-ign_urba_dec(repertoire = "raw_data/prescription_lin")
+ign_urba_dec(repertoire_donnees_brutes = "raw_data/prescription_lin")
 ```
 
 ```{r, echo = FALSE}
-ign_urba_dec(repertoire = "../raw_data/prescription_lin")
+tod::ign_urba_dec(repertoire_donnees_brutes = "../raw_data/prescription_lin")
 ```
+
 A l'issue de l'étape, qui est rapide, on peut vérifier que tout s'est bien déroulé. Il doit y avoir un sous-répertoire par fichier `.zip`.
 
 ![](../assets/explorateur_2.png)
@@ -105,112 +103,107 @@ ign_urba_net_rep(repertoire = "raw_data/prescription_lin",
 ```
 
 ```{r, echo = FALSE}
-ign_urba_net_rep(repertoire = "../raw_data/prescription_lin",
+ign_urba_net_rep(repertoire_donnees_brutes = "../raw_data/prescription_lin",
                  seuil_ko = 2)
 ```
 ## Lecture des shapefiles
 
-La lecture est effectuée avec la fonction `ign_urba_lire_shapes()`.
+La lecture est effectuée avec la fonction `ign_urba_lire_shapes()` qui renvoie une liste contenant autant d'objets géographiques qu'il y a de shapefiles dans le répertoire.
 
 ```{r, eval = FALSE}
-sf_liste <- ign_urba_lire_shapes(repertoire = "raw_data/prescription_lin")
+sf_liste <- ign_urba_lire_shapes(repertoire_donnees_brutes = "raw_data/prescription_lin")
 ```
 
 ```{r ign_urba_lire_shapes, echo = FALSE}
-sf_liste <- ign_urba_lire_shapes(repertoire = "../raw_data/prescription_lin")
+sf_liste <- ign_urba_lire_shapes(repertoire_donnees_brutes = "../raw_data/prescription_lin")
 ```
-Dans cet exemple, la liste contient 2 objets qui contiennent chacun un certain nombre d'objets géographiques (`features`). 
+Dans cet exemple, la liste contient `r length(sf_liste)` objets qui contiennent chacun un certain nombre d'objets géographiques (`fearures`). 
 
 ![](../assets/sf_liste.png)
-
 Si l'on clique dessus on en sait plus :
 
 ![](../assets/sf_liste_2.png)
 
-Le premier des éléments de la liste contient 10 000 objets (ce qui correspond à l'argument par défaut `nb_elements_par_telech = 10000` de la fonction de téléchargement `ign_urba_tod`) et le second 2 831 objets. Ils contiennent chacun 14 colonnes dont une contient la géométrie. Les autres colonnes sont les données attributaires.
+A ce stade on peut visualiser, par exemple le premier des éléments de la liste, que l'on sélectionne au moyen de crochets `[]`. Il contient `r sf_liste[1] %>% nrow()` lignes qui sont autant d'objets géographiques et `r sf_liste[1] %>% ncol()` colonnes qui sont leurs attributs. 
 
-A ce stade on peut visualiser, par exemple le premier des éléments de la liste, que l'on sélectionne au moyen de crochets `[]`.
+```{r}
+mapview(sf_liste[1])
+```
 
-NB : la fonction `mapview()` du package `mapview` n'est pas adaptée pour les objets géographiques trop volumineux.
+Le second :
 
-```{r, eval = FALSE}
-mapview::mapview(sf_liste[1])
+```{r}
+mapview(sf_liste[2])
 ```
 
 ## Assemblage des shapefiles
-
-Les objets de la liste ayant tous les mêmes 14 colonnes, il est possible de les assembler en les "empilant" au moyen de la fonction `ign_urba_assembler_sf()`.
 
 ```{r assemblage}
 assemblage <- ign_urba_assembler_sf(liste_sf = sf_liste)
 ```
 
-Pour visualiser (si pas trop gros) :
-
-```{r, eval = FALSE}
-mapview::mapview(assemblage)
+```{r}
+mapview(assemblage)
 ```
 
 ## Sauvegarde du shapefile assemblé
 
 
-```{r, eval = FALSE}
-fichier_donnees_traitees <- "processed_data/prescription_lin.shp"
-```
-
-```{r, echo = FALSE}
-fichier_donnees_traitees <- "../processed_data/prescription_lin.shp"
-```
-
-```{r}
+```{r, eval = F}
 ign_urba_sauver_shape(objet_sf = assemblage,
-                      chemin = fichier_donnees_traitees,
-                      scr = 2154)
+                      scr = 2154,
+                      repertoire_sortie = "processed_data",
+                      nom_fichier_sortie = "prescription_lin.shp")
+```
+
+```{r, echo = F}
+ign_urba_sauver_shape(objet_sf = assemblage,
+                      scr = 2154,
+                      repertoire_sortie = "../processed_data",
+                      nom_fichier_sortie = "prescription_lin.shp")
 ```
 
 ![](../assets/explorateur_3.png)
 
 # Traitement en une seule étape
 
-Il est possible d'enchaîner toutes les étapes décrites ci-dessus en une seule opération au moyen de la fonction `ign_urba_api_shp()` qui va directement produire le shapefile assemblé. L'avantage est que c'est simple et direct, tant que ... tout va bien. En cas de problème intermédiaire, il est plus facile de le résoudre en procédant par étapes.
-
-Exemple sur les prescriptions non plus linéaires mais surfaciques.
-
-```{r, echo = FALSE}
-ma_couche <- "prescription_surf"
-repertoire_donnees_brutes <- "../raw_data/prescription_surf"
-fichier_donnees_traitees <- "../processed_data/prescription_surf.shp"
-```
+La fonction `tgeo_ign_urba()` enchaîne les étapes détaillées ci-dessus et renvoie en outre un objet de classe `sf` qui est l'assemblage des shapefiles élémentaires.
 
 ```{r, eval = FALSE}
-ma_couche <- "prescription_surf"
-repertoire_donnees_brutes <- "raw_data/prescription_surf"
-fichier_donnees_traitees <- "processed_data/prescription_surf.shp"
+geoportail_urbanisme <- tgeo_ign_urba(
+  couche = "prescription_lin",
+  xmin = -7,
+  ymin = 47.5,
+  xmax = -4,
+  ymax = 48,
+  repertoire_donnees_brutes = "raw_data/prescription_lin",
+  repertoire_sortie = "processed_data",
+  nom_fichier_sortie = "prescription_lin.shp",
+  scr = 2154
+)
 ```
 
-```{r, echo = FALSE}
-# ign_urba_api_shp(couche = ma_couche,
-#                   xmin = -7,
-#                   ymin = 47.5,
-#                   xmax = -4.5,
-#                   ymax = 48,
-#                   repertoire = repertoire_donnees_brutes,
-#                   fichier_sortie = fichier_donnees_traitees,
-#                   scr = 2154)
-```
-
-
-```{r ign_urba_api_shp, eval = TRUE}
-ign_urba_api_shp(couche = ma_couche,
-                  xmin = -7,
-                  ymin = 47.5,
-                  xmax = -4.2,
-                  ymax = 48,
-                  repertoire = repertoire_donnees_brutes,
-                  fichier_sortie = fichier_donnees_traitees,
-                  scr = 2154)
-```
-
-Le résultat se retrouve par défaut dans le répertoire "processed_data" :
+Le résultat se retrouve par défaut dans le répertoire “processed_data” :
 
 ![](../assets/explorateur_4.png)
+
+Visualisation :
+
+```{r, echo = FALSE}
+geoportail_urbanisme <- tgeo_ign_urba(
+  couche = "prescription_lin",
+  xmin = -7,
+  ymin = 47.5,
+  xmax = -4,
+  ymax = 48,
+  repertoire_donnees_brutes = "../raw_data/prescription_lin",
+  repertoire_sortie = "../processed_data",
+  nom_fichier_sortie = "prescription_lin.shp",
+  scr = 2154
+)
+```
+
+```{r}
+mapview(geoportail_urbanisme )
+```
+
