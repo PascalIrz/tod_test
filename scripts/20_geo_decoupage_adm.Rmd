@@ -228,27 +228,17 @@ Cette [API développée par la mission Etalab](https://geo.api.gouv.fr/decoupage
 # IGN - Admin Express
 
 ```{r}
-url <- "ftp://Admin_Express_ext:Dahnoh0eigheeFok@ftp3.ign.fr/ADMIN-EXPRESS_3-0__SHP__FRA_WM_2021-10-15.7z"
-rep <- tempdir()
-curl::curl_download(url = url, destfile = "../raw_data/admin_express.7z")
-#download.file(url = url, destfile = "raw_data/admin_express", method = "auto")
-list.files("../raw_data")
-utils::unzip(zipfiles = "../raw_data/admin_express.7z")
-system('"C:/Program Files/7-Zip/7z.exe" e -o<"../raw_data"> <"admin_express.7z">')
-
-
-system('"C:/Program Files/7-Zip/7z.exe" e -aoa -o../raw_data/admin_express.7z ')
-
-url_admin_express <- "https://wxs-telechargement.ign.fr/x02uy2aiwjo9bm8ce5plwqmr/telechargement/prepackage/ADMINEXPRESS-COG-PACK_2018-05-04$ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03/file/ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03.7z"
-ie_get_proxy_for_url(url_admin_express)
-curl_download(url_admin_express , "data-raw/source/adminexpress.7z" , mode = "wb" )
-
-system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/metro data-raw/source/2018/adminexpress.7z *FR/COMMUNE_CARTO* -r')
-system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/971 data-raw/source/2018/adminexpress.7z *D971/COMMUNE_CARTO* -r')
-system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/972 data-raw/source/2018/adminexpress.7z *D972/COMMUNE_CARTO* -r')
-system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/973 data-raw/source/2018/adminexpress.7z *D973/COMMUNE_CARTO* -r')
-system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/974 data-raw/source/2018/adminexpress.7z *D974/COMMUNE_CARTO* -r')
-system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/976 data-raw/source/2018/adminexpress.7z *D976/COMMUNE_CARTO* -r')
+# 
+# url_admin_express <- "https://wxs-telechargement.ign.fr/x02uy2aiwjo9bm8ce5plwqmr/telechargement/prepackage/ADMINEXPRESS-COG-PACK_2018-05-04$ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03/file/ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03.7z"
+# ie_get_proxy_for_url(url_admin_express)
+# curl_download(url_admin_express , "data-raw/source/adminexpress.7z" , mode = "wb" )
+# 
+# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/metro data-raw/source/2018/adminexpress.7z *FR/COMMUNE_CARTO* -r')
+# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/971 data-raw/source/2018/adminexpress.7z *D971/COMMUNE_CARTO* -r')
+# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/972 data-raw/source/2018/adminexpress.7z *D972/COMMUNE_CARTO* -r')
+# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/973 data-raw/source/2018/adminexpress.7z *D973/COMMUNE_CARTO* -r')
+# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/974 data-raw/source/2018/adminexpress.7z *D974/COMMUNE_CARTO* -r')
+# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/976 data-raw/source/2018/adminexpress.7z *D976/COMMUNE_CARTO* -r')
 ```
 
 ```{r}
