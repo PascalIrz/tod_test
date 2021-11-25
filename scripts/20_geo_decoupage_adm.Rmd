@@ -13,25 +13,129 @@ knitr::opts_chunk$set(
 )
 ```
 
-Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées.
+# Introduction
+
+## Objectif du tutoriel
+
+Il s'agit ici de décrire comment accéder simplement au découpage administratif de la France (voire d'autres pays pour les faire par exemple apparaître en zones frontalières) pour différents usages.
+
+Selon ces usages, la précision requise diffère. Un découpage grossier suffira pour représenter des données nationales à l'échelle départementale. Il faudra en revanche plus de finesse pour les limites communales à l'intérieur d'un EPCI.
+
+Si la donnée représentée est rapportée à un découpage qui évolue dans le temps (par exemple à la commune ou à la région, entités qui ont subi des fusions), il faudra s'assurer de la compatibilité des millésimes entre données et découpage.  
+
+## Pré-requis
+
+Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées. Si ce n'est pas le cas se reporter à [ces explications](https://rpubs.com/kamoke/723467).
 
 Activation des `packages` :
 
-```{r}
+```{r, message = F, warning = F}
 library(tod)
 library(tidyverse)
+library(mapview)
 ```
 
-# Découpage administratif mondial
+# Package COGiter
+
+## Présentation
+
+COGiter fournit des fonctions, des données et des fonds de carte pour permettre des analyses territoriales sur les collectivités françaises. [Il est accompagné d'un tutoriel](https://maeltheuliere.github.io/COGiter/index.html).
+
+Ses principales fonctionnalités sont :
+
+- passerelle d'un millésime des codes communes à un autre
+- passerelles d'une échelle à une autre (région > département > EPCI > Commune)
+- fourniture de fonds de carte à ces 4 échelles
+
+Tout ça est extrêmement pratique, mais on peut préférer charger soi-même les données source IGN, OpenStreetMap, Insee, etc. et les archiver, d'où les sections suivantes.
+
+## Installation
+
+Si le package n'est pas encore installé, procéder à son téléchargement depuis le dépôt Gitlab de la Dreal des Pays de la Loire.
+
+```{r, eval = FALSE}
+devtools::install_gitlab("dreal-datalab/COGiter")
+```
+
+Puis l'activer :
+
+```{r}
+library(COGiter)
+```
+
+## Fonds de carte
+
+Les fonds de carte disponibles pour les départements et régions d'outre-mer ainsi que de métropole aux échelles mentionnées ci-dessus :
+
+```{r}
+ls("package:COGiter", pattern = "_geo$") # suffixe_geo pour les objets spatiaux
+```
+
+Chacun de ces objets est géographique, de classe `sf`. Il peut être visualisé simplement avec le package `ggplot` :
+
+```{r}
+ggplot(communes_972_geo) +
+  geom_sf()
+```
+
+Pour obtenir les contours sur un périmètre administratif, on utilise la fonction `filtrer_cog_geo()`. Son aide nous renseigne sur son usage. Elle mermet de filtrer le découpage national selon la commune, l'EPCI, le département ou la région (arguments `depcom`, `epci`, `dep`, `reg``, respectivement).	Elle renvoie une liste d'objets spatiaux correspondant à chacune des échelles.
+
+Exemple d'utilisation : carte des communes des Bouches du Rhône avec les limites des EPCI en bleu
+
+```{r}
+dept_13 <- filtrer_cog_geo(dep = "13")
+
+ggplot(data = dept_13$communes,
+       aes(fill = DEPCOM)) +
+  geom_sf() +
+  geom_sf(data = dept_13$epci,
+          col = "blue",
+          fill = alpha("red", 0),
+          size = 1) +
+  theme(legend.position = "none")
+```
+Si l'on veut les EPCI de la région avec leurs noms au survol, on applique à la carte créée par `ggplot` la fonction `ggplotly()` du package `plotly`:
+
+```{r}
+paca <- filtrer_cog_geo(reg = "93") %>% # code de la région PACA = 93
+  .$epci %>% # récupération du slop epci
+  left_join(y = epci) %>% # ajout des informations contenues dans le dataframe epci du package
+  select(EPCI, NOM_EPCI, geometry) # sélection des colonnes qui nous intéressent
+
+paca_carte <- ggplot(data = paca,
+       aes(fill = EPCI,
+           text = NOM_EPCI)) +
+  geom_sf() +
+  theme(legend.position = "none")
+
+plotly::ggplotly(paca_carte)
+```
+
+## Tables de correspondance
+
+Le package contient les tables de passage entre échelles.
+
+```{r}
+communes %>% head() %>% DT::datatable()
+epci %>% head() %>% DT::datatable()
+departements %>% head() %>% DT::datatable()
+regions %>% head() %>% DT::datatable()
+```
+
+
+# Source GADM
 
 Le [projet GADM](https://gadm.org/index.html) vise à cartographier le découpage administratif de l'ensemble des pays du monde, à chacun des niveaux de finesse. Ses données sont en libre accès sauf pour usage commercial et le [package `GADMTools`](https://github.com/Epiconcept-Paris/GADMTools) simplifie l'utilisation de ses données. Un [tutoriel en français](https://delladata.fr/dessinez-des-cartes-administratives-avec-gadmtools/) existe pour ce package.
 
 La fonction `gadm_sf_loadCountries()` permet de charger la carte pour un (ou plusieurs) pays en spécifiant la finesse du découpage par l'argument `level`. Le niveau `level = 0` retourne les frontières du pays. Pour la France, `level = 1`, retourne les régions, `level = 2` les départements, etc.
 
+Les fichiers sont légers donc le téléchargement est rapide mais la précision peut manquer pour certain s usages.
+
 ```{r, message = FALSE}
 library(GADMTools)
 depts_fr <- gadm_sf_loadCountries("FRA",
-                                  level = 2 )
+                                  level = 2,
+                                  basefile = "../raw_data/")
 ```
 
 La visualisation de l'objet retourné prévue dans le package :
@@ -52,36 +156,49 @@ On peut donc extraire le `slot` nommé `sf` qui est un objet spatial facilement 
 mapview::mapview(depts_fr$sf)
 ```
 
-# Découpage France d'après OpenStreetMap
+# Source OpenStreetMap
 
-Ces données sont diffusées sur la plateforme [www.data.gouv.fr](www.data.gouv.fr).
+Ces données sont diffusées sur la plateforme [www.data.gouv.fr](https://www.data.gouv.fr/fr/datasets/decoupage-administratif-communal-francais-issu-d-openstreetmap/). La précision est meilleure que pour le projet GADM mais le fichier à télécharger dépasse 200Mo.
 
+## Départements
 
 ```{r}
-# url <- "https://www.data.gouv.fr/fr/datasets/r/a01aff2a-8f36-4a77-a73f-efc212fe2899"
-# depts <- osm_depts_tod(url = url,
-#                        repertoire = "../raw_data",
-#                        crs_sortie = 2154)
+url <- "https://www.data.gouv.fr/fr/datasets/r/3096e551-c68d-40ce-8972-a228c94c0ad1"
+depts <- tgeo_osm_adm(url = url,
+                      repertoire_donnees_brutes = "../raw_data/depts")
 ```
 
 ```{r}
-# depts %>% 
-#   filter(str_length(code_insee) == 2) %>%  # périmètre métropole
-#   ggplot() +
-#     geom_sf()
+depts %>%
+  filter(str_length(code_insee) == 2) %>%  # périmètre métropole
+  ggplot() +
+    geom_sf()
 ```
 
+Pour une projection en Lambert 93 (code EPSG 2154) :
+
 ```{r}
-url <- "https://www.data.gouv.fr/fr/datasets/r/07b7c9a2-d1e2-4da6-9f20-01a7b72d4b12"
-communes <- osm_communes_tod(url = url,
-                             repertoire = "../raw_data",
-                             crs_sortie = 2154)
+depts %>%
+  sf::st_transform(crs = 2154) %>% 
+  filter(str_length(code_insee) == 2) %>%  # périmètre métropole
+  ggplot() +
+    geom_sf()
 ```
+
+## Communes
+
+```{r}
+
+url <- "https://www.data.gouv.fr/fr/datasets/r/17062524-991f-4e13-9bf0-b410cc2216fd"
+com <- tgeo_osm_adm(url = url,
+                    repertoire_donnees_brutes = "../raw_data/com")
+```
+
 
 Les communes de la Corse-du-Sud :
 
 ```{r}
-communes %>% 
+com %>% 
   filter(str_sub(insee, 1, 2) == "2A") %>% 
   mapview::mapview()
 ```
@@ -89,9 +206,57 @@ communes %>%
 Rattachement des départements aux régions
 
 ```{r}
-# corres <- tod::df_dept_reg()
-# 
-# depts <- depts %>% 
-#   left_join(y = corres)
+corres <- ttab_geoapi_dept_reg()
+
+depts <- depts %>%
+  left_join(y = corres,
+            by = c('code_insee' = 'code_dept'))
+
+regs <- depts %>%
+  filter(str_length(code_insee) == 2) %>% 
+  ugeo_aggr(variable_aggregation = "nom_reg")
+
+ggplot(regs) + geom_sf()
 
 ```
+
+# L'API Géo
+
+Cette [API développée par la mission Etalab](https://geo.api.gouv.fr/decoupage-administratif) propose au téléchargement des données sur le découpage administratif de la France.
+
+
+# IGN - Admin Express
+
+```{r}
+url <- "ftp://Admin_Express_ext:Dahnoh0eigheeFok@ftp3.ign.fr/ADMIN-EXPRESS_3-0__SHP__FRA_WM_2021-10-15.7z"
+rep <- tempdir()
+curl::curl_download(url = url, destfile = "../raw_data/admin_express.7z")
+#download.file(url = url, destfile = "raw_data/admin_express", method = "auto")
+list.files("../raw_data")
+utils::unzip(zipfiles = "../raw_data/admin_express.7z")
+system('"C:/Program Files/7-Zip/7z.exe" e -o<"../raw_data"> <"admin_express.7z">')
+
+
+system('"C:/Program Files/7-Zip/7z.exe" e -aoa -o../raw_data/admin_express.7z ')
+
+url_admin_express <- "https://wxs-telechargement.ign.fr/x02uy2aiwjo9bm8ce5plwqmr/telechargement/prepackage/ADMINEXPRESS-COG-PACK_2018-05-04$ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03/file/ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03.7z"
+ie_get_proxy_for_url(url_admin_express)
+curl_download(url_admin_express , "data-raw/source/adminexpress.7z" , mode = "wb" )
+
+system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/metro data-raw/source/2018/adminexpress.7z *FR/COMMUNE_CARTO* -r')
+system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/971 data-raw/source/2018/adminexpress.7z *D971/COMMUNE_CARTO* -r')
+system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/972 data-raw/source/2018/adminexpress.7z *D972/COMMUNE_CARTO* -r')
+system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/973 data-raw/source/2018/adminexpress.7z *D973/COMMUNE_CARTO* -r')
+system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/974 data-raw/source/2018/adminexpress.7z *D974/COMMUNE_CARTO* -r')
+system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/976 data-raw/source/2018/adminexpress.7z *D976/COMMUNE_CARTO* -r')
+```
+
+```{r}
+devtools::install_github("MaelTheuliere/COGiter")
+library(COGiter)
+data(communes)
+data(regions)
+regions %>% View
+```
+
+

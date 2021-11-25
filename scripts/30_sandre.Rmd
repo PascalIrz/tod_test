@@ -1,0 +1,44 @@
+---
+title: "Package {tod} - Données SANDRE"
+author: "Pascal Irz"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  cache = FALSE,
+  comment = "#>"
+)
+```
+
+# 
+
+```{r}
+bnpe_ouvrages <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/prl",
+                                 couche = "OuvragePrel")
+
+bnpe_points_prel <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/prl",
+                                    couche = "PointPrelevement")
+
+obstacles_ecoulement <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/obs",
+                                        couche = "ObstEcoul")
+
+her2 <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/mdo?",
+                        couche = "Hydroecoregion2")
+```
+
+
+
+# Configuration
+
+Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées. Si ce n'est pas le cas se reporter à [ces explications](https://rpubs.com/kamoke/723467).
+
+Activation des `packages` :
+
+```{r, message=F, warning=F}
+library(tod)
+library(tidyverse)
+library(mapview)
+```
