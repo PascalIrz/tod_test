@@ -1,0 +1,18 @@
+URL;Thème
+https://services.sandre.eaufrance.fr/geo/eth                                            ;Hydrographique bd_carthage 
+https://services.sandre.eaufrance.fr/geo/mdo                                           ;Masses d'eau hors meso/mesu
+https://services.sandre.eaufrance.fr/geo/MasseDEau_VRAP2010        ;meso/mesu wise
+https://services.sandre.eaufrance.fr/geo/MasseDEau_VEDL2013         ; meso/mesu sandre 
+https://services.sandre.eaufrance.fr/geo/MasseDEau_VRAP2016       ;meso/mesu wise
+https://services.sandre.eaufrance.fr/geo/obs                                            ;Obstacles à l'ecoulement
+https://services.sandre.eaufrance.fr/geo/odp                                            ;Ouvrages de dépollution
+https://services.sandre.eaufrance.fr/geo/saq                                          ;Hydrogéologie
+https://services.sandre.eaufrance.fr/geo/sel                                             ;Lieux de surveillance
+https://services.sandre.eaufrance.fr/geo/stq     ;Stations de mesure de la qualité des eaux de surface 
+https://services.sandre.eaufrance.fr/geo/zagri                                       ;Zone agricole
+https://services.sandre.eaufrance.fr/geo/zppn                   ;Zones de Protection du Patrimoine Naturel
+https://services.sandre.eaufrance.fr/geo/zrpe                    ;Zones de Régulations pour l?Environnement
+https://services.sandre.eaufrance.fr/geo/zgr                     ;Zones de Gestion de la Ressource
+https://services.sandre.eaufrance.fr/geo/hyd                                            ;Hydrométrie
+https://services.sandre.eaufrance.fr/geo/com                                          ;Administratif
+https://services.sandre.eaufrance.fr/geo/vic                                            ;Vigilance crue
