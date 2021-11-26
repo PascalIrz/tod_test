@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup, include = FALSE}
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   cache = FALSE,
@@ -94,6 +94,7 @@ ggplot(data = dept_13$communes,
           size = 1) +
   theme(legend.position = "none")
 ```
+
 Si l'on veut les EPCI de la région avec leurs noms au survol, on applique à la carte créée par `ggplot` la fonction `ggplotly()` du package `plotly`:
 
 ```{r}
@@ -158,15 +159,31 @@ mapview::mapview(depts_fr$sf)
 
 # Source OpenStreetMap
 
-Ces données sont diffusées sur la plateforme [www.data.gouv.fr](https://www.data.gouv.fr/fr/datasets/decoupage-administratif-communal-francais-issu-d-openstreetmap/). La précision est meilleure que pour le projet GADM mais le fichier à télécharger dépasse 200Mo.
+Ces données sont diffusées sur la plateforme [www.data.gouv.fr]'https://www.data.gouv.fr/fr/organizations/openstreetmap/). Pour certains de ces fichiers, la précision est meilleure que pour le projet GADM et les fichiers à télécharger sont nettement plus lourds (200Mo pour les communes).
+
+On note en particulier :
+
+- les [contours des départements](https://www.data.gouv.fr/fr/datasets/contours-des-departements-francais-issus-d-openstreetmap/)
+- les [contours des communes](https://www.data.gouv.fr/fr/datasets/decoupage-administratif-communal-francais-issu-d-openstreetmap/)
+
+Pour y accéder, on utilise la fonction `tgeo_osm_adm()` du package `tod` qui permet de :
+
+- télécharger les données shapefile compressés
+- les décompresser
+- si besoin en sauvegarder une copie en choisissant le répertoire (argument `repertoire_donnees_brutes`)
+- obtenir un objet géographique de classe `sf` du découpage choisi.
 
 ## Départements
+
+Les contours sont proposés à plusieurs niveaux de précision (de 1 à 22Mo) pour plusieurs millésimes. Par exemple pour télécharger l'export de mars 2014 - vérifié et simplifié à 100m :
 
 ```{r}
 url <- "https://www.data.gouv.fr/fr/datasets/r/3096e551-c68d-40ce-8972-a228c94c0ad1"
 depts <- tgeo_osm_adm(url = url,
                       repertoire_donnees_brutes = "../raw_data/depts")
 ```
+
+Affichage :
 
 ```{r}
 depts %>%
@@ -187,6 +204,9 @@ depts %>%
 
 ## Communes
 
+Le jeu de données est disponible sur [cette page](https://www.data.gouv.fr/fr/datasets/decoupage-administratif-communal-francais-issu-d-openstreetmap/).
+
+
 ```{r}
 
 url <- "https://www.data.gouv.fr/fr/datasets/r/17062524-991f-4e13-9bf0-b410cc2216fd"
@@ -194,8 +214,7 @@ com <- tgeo_osm_adm(url = url,
                     repertoire_donnees_brutes = "../raw_data/com")
 ```
 
-
-Les communes de la Corse-du-Sud :
+Affichage de la carte interactive des communes de la Corse-du-Sud, avec `mapview` :
 
 ```{r}
 com %>% 
@@ -203,7 +222,7 @@ com %>%
   mapview::mapview()
 ```
 
-Rattachement des départements aux régions
+Rattachement des départements aux régions :
 
 ```{r}
 corres <- ttab_geoapi_dept_reg()
@@ -225,28 +244,6 @@ ggplot(regs) + geom_sf()
 Cette [API développée par la mission Etalab](https://geo.api.gouv.fr/decoupage-administratif) propose au téléchargement des données sur le découpage administratif de la France.
 
 
-# IGN - Admin Express
 
-```{r}
-# 
-# url_admin_express <- "https://wxs-telechargement.ign.fr/x02uy2aiwjo9bm8ce5plwqmr/telechargement/prepackage/ADMINEXPRESS-COG-PACK_2018-05-04$ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03/file/ADMIN-EXPRESS-COG_1-1__SHP__FRA_2018-04-03.7z"
-# ie_get_proxy_for_url(url_admin_express)
-# curl_download(url_admin_express , "data-raw/source/adminexpress.7z" , mode = "wb" )
-# 
-# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/metro data-raw/source/2018/adminexpress.7z *FR/COMMUNE_CARTO* -r')
-# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/971 data-raw/source/2018/adminexpress.7z *D971/COMMUNE_CARTO* -r')
-# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/972 data-raw/source/2018/adminexpress.7z *D972/COMMUNE_CARTO* -r')
-# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/973 data-raw/source/2018/adminexpress.7z *D973/COMMUNE_CARTO* -r')
-# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/974 data-raw/source/2018/adminexpress.7z *D974/COMMUNE_CARTO* -r')
-# system('"C:/Program Files (x86)/7-Zip/7z.exe" e -aoa -odata-raw/source/2018/adminexpress/976 data-raw/source/2018/adminexpress.7z *D976/COMMUNE_CARTO* -r')
-```
-
-```{r}
-devtools::install_github("MaelTheuliere/COGiter")
-library(COGiter)
-data(communes)
-data(regions)
-regions %>% View
-```
 
 
