@@ -18,7 +18,11 @@ knitr::opts_chunk$set(
 
 # Objectif du tuto
 
-La fonction `tgeo_wfs_sandre()` du package `tod` permet d'accéder simplement à une masse de "lots de données de référence" disponibles via le flux WFS du Sandre. Pour s'y retrouver, il est utile de se reporter à [cette page](https://www.sandre.eaufrance.fr/actualite/evolution-des-services-web-g%C3%A9ographiques). Ces référentiels géographiques concernent les thèmes suivants :
+Il s'agit de montrer comment accéder simplement à une masse de "lots de données de référence" disponibles via le flux WFS du Sandre avec le logiciel R et de la fonction `tgeo_wfs_sandre()` du package `tod`.
+
+# Les données Sandre
+
+Pour s'y retrouver parmi les données diffusées sur le portail du Sandre, il est utile de se reporter à [cette page](https://www.sandre.eaufrance.fr/actualite/evolution-des-services-web-g%C3%A9ographiques). Ces référentiels géographiques concernent les thèmes suivants :
 
 ```{r, eval = T, echo = F}
 library(tod)
@@ -28,7 +32,6 @@ library(mapview)
 read.csv2("../assets/flux_sandre.csv") %>% 
   DT::datatable()
 ```
-
 
 Les possibilités de sélection géographique sont limitées. Elles s'opèrent en rajoutant un suffixe au nom de la couche. Par exemple, pour les obstacles à l'écoulement, qu'on peut trouver par le moteur de recherche du site :
 
@@ -46,7 +49,7 @@ Si l'on ajoute un suffixe on peut ne charger que :
 - la Guadeloupe (**ObstEcoul_GLP**)
 - etc.
 
-# Configuration
+# Configuration machine
 
 Les étapes de configuration de la machine et d'installation des packages sont considérées comme déjà réalisées. Si ce n'est pas le cas se reporter à [ces explications](https://rpubs.com/kamoke/723467).
 
