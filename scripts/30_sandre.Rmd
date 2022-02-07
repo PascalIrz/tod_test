@@ -62,9 +62,7 @@ library(mapview)
 ```
 
 
-# Exemples
-
-## Banque Nationale des Prélèvements d'eau (BNPE)
+# Banque Nationale des Prélèvements d'eau (BNPE)
 
 On peut accéder aux couches relatives aux ouvrages et aux points de prélèvement.
 
@@ -104,9 +102,6 @@ ggplot(her2) +
   geom_sf()
 ```
 
-
-
-
 # Les couches de la base TOPAGE
 
 Les bassins hydrographiques :
@@ -132,6 +127,25 @@ cours_deau <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/ge
 plans_deau <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
                               couche = "PlanEau")
 ```
+
+# BD CarTHAgE
+
+La [BD CarTHAgE](https://geo.data.gouv.fr/fr/datasets/82a7d05cc2e7bc060a62ba958728360f12a4a529) (Base de Données sur la CARtographie THématique des AGences de l'eau et du ministère chargé de l'environnement) est antérieure à Topage mais contient certaines informations complémentaires :
+
+![](../assets/couches_carthage.png)
+
+Par exemple pour le découpage hydrographique en "secteurs hydrographiques", plus fin que les "bassins hydrographiques" de Topage ci-dessus : 
+
+```{r, eval = FALSE}
+bv <- tod::tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/sandre",
+                                      couche = "SecteurHydro_FXX")
+
+bv %>% 
+  ggplot() +
+    geom_sf()
+```
+
+![](../assets/secteurs_hydro.png)
 
 # Les stations et sites hydrométriques
 
