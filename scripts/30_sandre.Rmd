@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup, echo = FALSE}
+```{r setup, echo = FALSE,}
 knitr::opts_chunk$set(
   collapse = TRUE,
   cache = FALSE,
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 # Objectif du tuto
 
-Il s'agit de montrer comment accéder simplement à une masse de "lots de données de référence" disponibles via le flux WFS du Sandre avec le logiciel R et de la fonction `tgeo_wfs_sandre()` du package `tod`.
+Il s'agit de montrer comment accéder simplement à une masse de "lots de données de référence" disponibles via le flux WFS du Sandre avec le logiciel R et de la fonction `wfs_sandre()` du package `tod`.
 
 # Les données Sandre
 
@@ -64,14 +64,14 @@ library(mapview)
 
 # Banque Nationale des Prélèvements d'eau (BNPE)
 
-On peut accéder aux couches relatives aux ouvrages et aux points de prélèvement.
+On peut accéder aux couches relatives aux ouvrages et aux points de prélèvement (NB les fichiers sont lourds donc le chargement prend un certain temps).
 
 ```{r, eval = F}
-bnpe_ouvrages <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/prl",
-                                 couche = "OuvragePrel")
+bnpe_ouvrages <- wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/prl",
+                            couche = "OuvragePrel")
 
-bnpe_points_prel <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/prl",
-                                    couche = "PointPrelevement")
+bnpe_points_prel <- wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/prl",
+                               couche = "PointPrelevement")
 ```
 
 
@@ -79,8 +79,8 @@ bnpe_points_prel <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance
 # Référentiel des obstacles à l'écoulement (ROE)
 
 ```{r, eval = F}
-obstacles_ecoulement <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/obs",
-                                        couche = "ObstEcoul")
+obstacles_ecoulement <- wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/obs",
+                                   couche = "ObstEcoul")
 ```
 
 
@@ -91,8 +91,9 @@ obstacles_ecoulement <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufr
 Chargement :
 
 ```{r, eval = T}
-her2 <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/mdo?",
-                        couche = "Hydroecoregion2")
+her2 <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/mdo?",
+             couche = "Hydroecoregion2")
 ```
 
 Affichage :
@@ -107,8 +108,9 @@ ggplot(her2) +
 Les bassins hydrographiques :
 
 ```{r, eval = T}
-bassins_hydro <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
-                                 couche = "BassinHydrographique_FXX")
+bassins_hydro <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
+             couche = "BassinHydrographique_FXX")
 
 ggplot(bassins_hydro) +
   geom_sf()
@@ -117,15 +119,18 @@ ggplot(bassins_hydro) +
 D'autres couches (certaines, dépassant 100Mo, sont longues à télécharger si votre connexion est faiblarde).
 
 ```{r, eval = F}
-bv_topo <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
-                           couche = "BassinVersantTopographique_FXX")
+bv_topo <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
+             couche = "BassinVersantTopographique_FXX")
 
 
-cours_deau <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
-                              couche = "CoursEau")
+cours_deau <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
+             couche = "CoursEau")
 
-plans_deau <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
-                              couche = "PlanEau")
+plans_deau <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/topage?",
+             couche = "PlanEau")
 ```
 
 # BD CarTHAgE
@@ -137,10 +142,11 @@ La [BD CarTHAgE](https://geo.data.gouv.fr/fr/datasets/82a7d05cc2e7bc060a62ba9587
 Par exemple pour le découpage hydrographique en "secteurs hydrographiques", plus fin que les "bassins hydrographiques" de Topage ci-dessus : 
 
 ```{r, eval = FALSE}
-bv <- tod::tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/sandre",
-                                      couche = "SecteurHydro_FXX")
+bv <-
+  tod::wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/sandre",
+                  couche = "SecteurHydro_FXX")
 
-bv %>% 
+bv %>%
   ggplot() +
     geom_sf()
 ```
@@ -152,11 +158,13 @@ bv %>%
 Ce sont les stations où sont effectuées les mesures de débit consultables via la banque HYDRO :
 
 ```{r, eval = FALSE}
-stations_hydro <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/hyd?",
-                                  couche = "StationHydro")
+stations_hydro <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/hyd?",
+             couche = "StationHydro")
 
-sites_hydro <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/hyd?",
-                               couche = "SiteHydro")
+sites_hydro <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/hyd?",
+             couche = "SiteHydro")
 ```
 
 
@@ -165,17 +173,20 @@ sites_hydro <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/g
 Exemple de Mayotte :
 
 ```{r, eval = FALSE}
-entites_hydrogeol_myt <- tgeo_wfs_sandre(url_wfs = "http://services.sandre.eaufrance.fr/geo/saq?",
-                                         couche = "EntiteHydroGeol_MYT")
+entites_hydrogeol_myt <-
+  wfs_sandre(url_wfs = "http://services.sandre.eaufrance.fr/geo/saq?",
+             couche = "EntiteHydroGeol_MYT")
 
-mapview::mapview(entites_hydrogeol_myt, alpha.regions = 0.01)
+mapview::mapview(entites_hydrogeol_myt,
+                 alpha.regions = 0.01)
 ```
 
 
 # Contrats de milieu (contrats de rivière)
 
 ```{r, eval = FALSE}
-cdm <- tgeo_wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/zpl?",
-                       couche = "ContratMilieu_FXX")
+cdm <-
+  wfs_sandre(url_wfs = "https://services.sandre.eaufrance.fr/geo/zpl?",
+             couche = "ContratMilieu_FXX")
 ```
 
